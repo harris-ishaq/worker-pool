@@ -45,16 +45,17 @@ func Process(transactions []acctstatement.Transactions, acctNo string, jobs chan
 		wg.Add(1)
 		jobs <- &data
 	}
-
 }
 
 func ProcessWork(jobs <-chan *entity.AcctStatement, wg *sync.WaitGroup) {
 	for worker := 0; worker < totalWorkers; worker++ {
 		go func(jobs <-chan *entity.AcctStatement, wg *sync.WaitGroup, worker int) {
-			data := <-jobs
-			log.Println("worker ", worker, "started job id ", data.Key)
-			time.Sleep(time.Second)
-			log.Println("worker ", worker, "done working on job id ", data.Key)
+			for job := range jobs {
+				log.Println("worker ", worker, "started job id ", job.Key)
+				time.Sleep(time.Second)
+				log.Println("worker ", worker, "done working on job id ", job.Key)
+				wg.Done()
+			}
 			// log.Println("Data: ", data)
 			// err := service.repoAcctStatement.Create(data)
 			// if err != nil {
@@ -81,8 +82,6 @@ func ProcessWork(jobs <-chan *entity.AcctStatement, wg *sync.WaitGroup) {
 			// if err := pub.Stan.Publish(config.CH_REPORTUPDATE, payloadDataBytes); err != nil {
 			// 	log.Printf("error cause:%+v\n", err)
 			// }
-
-			wg.Done()
 		}(jobs, wg, worker)
 	}
 

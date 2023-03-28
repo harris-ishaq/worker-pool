@@ -36,8 +36,8 @@ func main() {
 
 		service.Process(listAllTransactions, acctNo, jobs, wg)
 	}
+	wg.Wait()
 	close(jobs)
-	// wg.Wait()
 
 	// helpers.SendSignKill()
 	return
